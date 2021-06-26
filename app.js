@@ -1,3 +1,7 @@
+// ======ELEMENTS======
+const boardElement = $("#board");
+
+// ======STATE======
 let state = {
   board: [
     ["", "", ""],
@@ -10,6 +14,16 @@ let state = {
 
 // As users playing a two player game we want to:
 
+function startGame(event) {
+  enterName(event);
+
+  // have our order chosen for us by the game
+  state.activePlayer = state.players[0];
+  // state.activePlayer
+
+  renderBoard();
+}
+
 // enter our names and have them displayed
 function enterName(event) {
   event.preventDefault();
@@ -20,12 +34,17 @@ function enterName(event) {
   createPlayerObj(player2, "O");
   console.log(state);
 }
-function startGame(event) {
-  enterName(event);
 
-  // have our order chosen for us by the game
-  state.activePlayer = state.players[0];
-  // state.activePlayer
+// Function to render our board to the screen
+function renderBoard() {
+  state.board.forEach((row, rowIndex) => {
+    row.forEach((col, columnIndex) => {
+      const newCell = $("<div></div>");
+      console.log(newCell);
+      newCell.attr("id", `${rowIndex},${columnIndex}`);
+      boardElement.append(newCell);
+    });
+  });
 }
 
 function swapTurns() {
