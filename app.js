@@ -5,6 +5,7 @@ let state = {
     ["", "", ""],
   ],
   players: [],
+  activePlayer: {},
 };
 
 // As users playing a two player game we want to:
@@ -19,19 +20,35 @@ function enterName(event) {
   createPlayerObj(player2, "O");
   console.log(state);
 }
+function startGame(event) {
+  enterName(event);
 
-$("#start").click(enterName);
+  // have our order chosen for us by the game
+  state.activePlayer = state.players[0];
+  // state.activePlayer
+}
+
+function swapTurns() {
+  // state.activePlayer === players[0], then swap to players[1]
+  if (state.activePlayer.piece === state.players[0].piece)
+    state.activePlayer = state.players[1];
+
+  // state.activePlayer === players[1], then swap to players[0]
+  if (state.activePlayer.piece === state.players[1].piece)
+    state.activePlayer = state.players[0];
+}
+
+// $("#start").click((event) => startGame(event));
+$("#start").click(startGame);
 
 function createPlayerObj(name, piece) {
   let player = {
     name,
     piece,
-    playersTurn: false,
   };
   state.players.push(player);
 }
 
-// have our order chosen for us by the game
 // take turns placing our marks in empty spaces
 // not be able to place our marks in an occupied space
 // be told when a move causes a player to win, or to draw
