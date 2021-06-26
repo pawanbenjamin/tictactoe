@@ -6,7 +6,11 @@
 }
 
 .cell {
-  width: 200px;
-  height: 200px;
-  color: red;
+  width: 100px;
+  height: 100px;
+  background-color: red;
+
+  text-align: center;
+  font-size: 60px;
+  color: white;
 }
