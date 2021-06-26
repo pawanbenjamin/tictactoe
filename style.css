@@ -14,3 +14,10 @@
   font-size: 60px;
   color: white;
 }
+
+.hideWin {
+  display: none;
+}
+.showWin {
+  display: block;
+}

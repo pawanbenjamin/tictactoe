@@ -1,5 +1,6 @@
 // ======ELEMENTS======
 const boardElement = $("#board");
+const winElement = $("#winIndicator");
 
 // ======STATE======
 let state = {
@@ -15,6 +16,7 @@ let state = {
 // As users playing a two player game we want to:
 
 function startGame(event) {
+  resetGame();
   enterName(event);
 
   // have our order chosen for us by the game
@@ -32,7 +34,8 @@ function enterName(event) {
   let player2 = $("#player2name").val();
   createPlayerObj(player1, "X");
   createPlayerObj(player2, "O");
-  console.log(state);
+  $("#player1nameHeader").text(player1);
+  $("#player2nameHeader").text(player2);
 }
 
 // Function to render our board to the screen
@@ -85,19 +88,21 @@ function onCellClick() {
   board[row][col] = activePlayer.piece;
   console.log(state);
   renderBoard();
-  if (hasPlayerWon()) console.log(activePlayer.piece + " has won!");
-  if (didPlayersDraw()) console.log("Both players drawded!");
+  if (hasPlayerWon()) {
+    winElement.removeClass("hideWin");
+    winElement.addClass("showWin");
+    winElement.text(`${activePlayer.name} has won!`);
+  }
+  if (didPlayersDraw()) {
+    winElement.removeClass("hideWin");
+    winElement.addClass("showWin");
+    winElement.text(`Its a draw!`);
+  }
   swapTurns();
 }
 
 function hasPlayerWon() {
   const { board, activePlayer } = state;
-
-  // board: [
-  //   ["", "", ""],
-  // ["", "", ""],
-  //   ["", "", ""],
-  // ],
 
   if (board[0][0] === activePlayer.piece) {
     if (board[0][0] === board[0][1] && board[0][1] === board[0][2]) return true;
@@ -141,11 +146,25 @@ function didPlayersDraw() {
 }
 
 // be told when a move causes a player to win, or to draw
+
 // start the game over without having to reset the browser
+function resetGame() {
+  state = {
+    board: [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+    ],
+    players: [],
+    activePlayer: {},
+  };
+  winElement.removeClass();
+  winElement.addClass("hideWin");
+}
 
 // As a user playing a single player game I additionally want to:
 // see the name 'Computer' displayed as my opponent
 // have the Computer player make moves as if it were a human player with the correct mark in an empty space
-// As a user playing a single player game I would be delighted if:
 
+// As a user playing a single player game I would be delighted if:
 // the Computer made 'better-than-guessing' choices when placing a mark on the board
