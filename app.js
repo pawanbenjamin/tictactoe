@@ -1,6 +1,11 @@
 // ======ELEMENTS======
 const boardElement = $("#board");
 const winElement = $("#winIndicator");
+const player1Input = $("#player1name");
+const player1Header = $("#player1nameHeader");
+const player2Input = $("#player2name");
+const player2Header = $("#player2nameHeader");
+const startButton = $(".start");
 
 // ======STATE======
 let state = {
@@ -14,28 +19,45 @@ let state = {
 };
 
 // As users playing a two player game we want to:
-
 function startGame(event) {
   resetGame();
   enterName(event);
 
   // have our order chosen for us by the game
   state.activePlayer = state.players[0];
-  // state.activePlayer
-
   renderBoard();
+}
+
+function resetGame() {
+  state = {
+    board: [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+    ],
+    players: [],
+    activePlayer: {},
+  };
+  winElement.removeClass();
+  winElement.addClass("hideWin");
 }
 
 // Grabs names from the dom and uses them as our players new names
 function enterName(event) {
   event.preventDefault();
   state.players = [];
-  let player1 = $("#player1name").val();
-  let player2 = $("#player2name").val();
+  let player1 = player1Input.val();
+  player1Header.text(player1);
   createPlayerObj(player1, "X");
-  createPlayerObj(player2, "O");
-  $("#player1nameHeader").text(player1);
-  $("#player2nameHeader").text(player2);
+
+  let player2 = player2Input.val();
+  if (player2) {
+    player2Header.text(player2);
+    createPlayerObj(player2, "O");
+  } else {
+    player2Header.text("Hal");
+    createPlayerObj("Hal", "🚷");
+  }
 }
 
 // Function to render our board to the screen
@@ -53,18 +75,6 @@ function renderBoard() {
   });
 }
 
-function swapTurns() {
-  const { activePlayer, players } = state;
-  // state.activePlayer === players[0], then swap to players[1]
-  if (activePlayer.piece === players[0].piece) state.activePlayer = players[1];
-  // state.activePlayer === players[1], then swap to players[0]
-  else if (activePlayer.piece === players[1].piece)
-    state.activePlayer = players[0];
-}
-
-// $("#start").click((event) => startGame(event));
-$("#start").click(startGame);
-
 function createPlayerObj(name, piece) {
   let player = {
     name,
@@ -75,32 +85,62 @@ function createPlayerObj(name, piece) {
 
 // take turns placing our marks in empty spaces
 function onCellClick() {
-  const { board, activePlayer } = state;
+  const { activePlayer } = state;
 
   let id = $(this).attr("id");
-  let idArray = id.split(",");
-  let row = idArray[0];
-  let col = idArray[1];
+  fillCell(id);
 
-  // not be able to place our marks in an occupied space
+  if (state.activePlayer.name === "Hal") takeComputerTurn();
+}
+
+/**
+ * This is what fillCell does
+ * @param id this is an id string to represent ids and stuff
+ */
+function fillCell(id) {
+  const { board, activePlayer } = state;
+
+  const [row, col] = id.split(",");
+
   if (board[row][col] !== "") return;
 
   board[row][col] = activePlayer.piece;
-  console.log(state);
   renderBoard();
+  checkForEndGame();
+  swapTurns();
+}
+
+function checkForEndGame() {
+  const { activePlayer } = state;
+
   if (hasPlayerWon()) {
     winElement.removeClass("hideWin");
     winElement.addClass("showWin");
-    winElement.text(`${activePlayer.name} has won!`);
+    if (activePlayer.name === "Hal")
+      winElement.text(
+        `I'm sorry ${state.players[0].name}, I can't let you do that.`
+      );
+    else winElement.text(`${activePlayer.name} has won!`);
   }
   if (didPlayersDraw()) {
     winElement.removeClass("hideWin");
     winElement.addClass("showWin");
     winElement.text(`Its a draw!`);
   }
-  swapTurns();
 }
 
+function swapTurns() {
+  const { activePlayer, players } = state;
+  // state.activePlayer === players[0], then swap to players[1]
+  if (activePlayer.piece === players[0].piece) state.activePlayer = players[1];
+  // state.activePlayer === players[1], then swap to players[0]
+  else if (activePlayer.piece === players[1].piece)
+    state.activePlayer = players[0];
+}
+
+/**
+ * Parses the board to see if any players have won the game.
+ */
 function hasPlayerWon() {
   const { board, activePlayer } = state;
 
@@ -145,26 +185,24 @@ function didPlayersDraw() {
   return numBlankSpaces === 0;
 }
 
-// be told when a move causes a player to win, or to draw
+function takeComputerTurn() {
+  // Grab all of the available spaces
+  const possibleMoves = [];
 
-// start the game over without having to reset the browser
-function resetGame() {
-  state = {
-    board: [
-      ["", "", ""],
-      ["", "", ""],
-      ["", "", ""],
-    ],
-    players: [],
-    activePlayer: {},
-  };
-  winElement.removeClass();
-  winElement.addClass("hideWin");
+  // Loop through our board...
+  for (var row = 0; row < 3; row++) {
+    for (var col = 0; col < 3; col++) {
+      // If board i, j === empty string, add it to possible moves
+      if (state.board[row][col] === "") possibleMoves.push(`${row},${col}`);
+    }
+  }
+
+  // Pick random id in possible moves
+  const nextMove = Math.floor(Math.random() * possibleMoves.length);
+
+  // Put a piece in a random spot
+  fillCell(possibleMoves[nextMove]);
 }
 
-// As a user playing a single player game I additionally want to:
-// see the name 'Computer' displayed as my opponent
-// have the Computer player make moves as if it were a human player with the correct mark in an empty space
-
-// As a user playing a single player game I would be delighted if:
-// the Computer made 'better-than-guessing' choices when placing a mark on the board
+// =====INIT LISTENERS=====
+startButton.click(startGame);
