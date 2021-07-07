@@ -1,3 +1,5 @@
+// Hi Pawan! You have a nice zoom background. From- Ben
+
 // ======ELEMENTS======
 const boardElement = $("#board");
 const winElement = $("#winIndicator");
